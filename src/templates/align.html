@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Live Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+<style>
+	body {
+		font-family: "Orbitron", sans-serif, monospace;
+		font-size: x-large;
+		font-optical-sizing: auto;
+		font-weight: 900;
+		font-style: normal;
+		background-color: black;
+		color: grey;
+	}
+
+	h {
+		font-size: xx-large;
+	}
+
+	p {
+		margin: 0 0;
+	}
+
+	p.label {
+		font-size: small;
+		font-weight: 400;
+	}
+
+	p.small-label {
+		font-size: xx-small;
+		font-weight: 400;
+	}
+
+	a {
+		font-size: small;
+	}
+
+	a:link {
+	}
+	
+	a:visited {
+		color: grey;
+	}
+	
+	a:focus {
+	}
+	
+	a:hover {
+		color: white;
+	}
+	
+	a:active {
+	}
+
+	hr {
+	    display: blo	ck;
+	    height: 0px;
+	    border: 0;
+	    border-top: 5px solid black;
+	    margin: 0 0;
+	    padding: 0;
+	    width: 2em;
+	}
+
+	.data {
+		font-size: x-large;
+		font-optical-sizing: auto;
+	}
+
+	#canvas-container {
+	   width: 100%;
+	   text-align:center;
+	}
+
+	canvas {
+	   display: inline;
+	}
+
+	img {
+		margin: 1em;
+		border: solid grey;
+	}
+
+	button {
+		margin: 2px;
+	}
+</style>
+</head>
+<body>
+	<center>
+		<h>Live Feed</h><p/>
+		<a href="/focus">Focus Tool<a/>   |   <a href="/">Live Feed<a/>
+	</center>
+    <center>
+    	<img src="/align_stream"/>
+    </center>
+    <center>
+	    <button onclick="document.getElementById('popup').style.display='block'; return false;">
+	      Capture Reference
+	    </button>
+	    
+	    <!-- Popup -->
+    </center>
+    <div id="popup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);">
+	    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+	                background:#fff; padding:1.5rem; border-radius:6px; box-shadow:0 2px 8px #0003;">
+	      <p>Type <b>YES</b> to confirm:</p>
+	      <input id="popupInput" placeholder="CONFIRM" value="">
+	      <div style="margin-top:1rem; text-align:right;">
+	        <button onclick="
+	           if(document.getElementById('popupInput').value.trim()==='CONFIRM'){
+	             fetch('/align_capture',{method:'POST',body:'confirmed'});
+	             document.getElementById('popup').style.display='none';
+	           }else{
+	             alert('Wrong text – keeping old reference.');
+	           }">OK</button>
+	        <button onclick="document.getElementById('popup').style.display='none'">Cancel</button>
+	      </div>
+	    </div>
+	  </div>
+</body>
+</html>
