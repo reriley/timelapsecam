@@ -7,6 +7,7 @@ import json
 from aiohttp import web
 import numpy as np
 from scipy import ndimage
+import aiohttp_jinja2
 
 from .templates import html_response
 
@@ -15,16 +16,17 @@ logger = logging.getLogger("focus")
 logger.setLevel(logging.DEBUG)
 
 
-SAMPLE_FREQUENCY = 10  # Hertz
-MAXXING_WINDOW = 10  # seconds
-AVERAGING_WINDOW = 10  # seconds
+SAMPLE_FREQUENCY = 10  # Hertz (only notional)
+AVERAGING_WINDOW = 5  # samples
+MAXXING_WINDOW = 6  # batchs of averaging samples
 
 
 convert_to_gray = lambda rgb : np.dot(rgb[... , :3] , [0.299 , 0.587, 0.114])
 
 
+@aiohttp_jinja2.template("focus.html")
 async def focus_page_handler(request):
-    return html_response('./src/templates/focus.html')
+    return {"page_title": "Focus Tool"}
 
 
 async def get_laplacian_variance(camera):
@@ -52,18 +54,31 @@ async def focus_stream_handler(request):
 
     laplacian = get_laplacian_variance(camera)
 
-    lvar = [await anext(laplacian)] * (MAXXING_WINDOW * SAMPLE_FREQUENCY)
+    start_var = await anext(laplacian)
+    
+    lvar_samples = [start_var] * AVERAGING_WINDOW
+    lvar_mvg_avgs = [start_var] * MAXXING_WINDOW
+    lvar_max = start_var
     
     try:
         while True:
-            lvar.append(await anext(laplacian))
-            lvar.pop(0)
+            lvar_sample = await anext(laplacian)
+            lvar_samples.append(lvar_sample)
+            lvar_samples.pop(0)
+            
+            mvg_avg = np.mean(lvar_samples[-AVERAGING_WINDOW:])
+            lvar_mvg_avgs.append(mvg_avg)
+            lvar_mvg_avgs.pop(0)
+            
+            lvar_max = max(lvar_mvg_avgs)
+            
             json_str = json.dumps(
                 {
-                    "lvar": lvar[-1],
-                    "lvar_max": max(lvar)
+                    "lvar": mvg_avg,
+                    "lvar_max": lvar_max
                 }
             )
+            
             await response.write(f'data:{json_str}\n\n'.encode())
             await asyncio.sleep(1/SAMPLE_FREQUENCY)
              

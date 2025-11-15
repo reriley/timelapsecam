@@ -1,17 +1,20 @@
-from PIL import Image
-from aiohttp import web
 import io
 import logging
 import time
 import asyncio
+
+from PIL import Image
+from aiohttp import web
+import aiohttp_jinja2
 
 from .templates import html_response
 
 logger = logging.getLogger("stream")
 
 
+@aiohttp_jinja2.template("feed.html")
 async def feed_page_handler(request):
-    return html_response('./src/templates/feed.html')
+    return {"page_title": "Live Feed"}
 
 
 async def feed_stream_handler(request):

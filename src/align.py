@@ -1,9 +1,11 @@
-from PIL import Image
-from aiohttp import web
 import io
 import logging
 import time
 import asyncio
+
+from PIL import Image
+from aiohttp import web
+import aiohttp_jinja2
 
 from .templates import html_response
 
@@ -11,8 +13,14 @@ logger = logging.getLogger("stream")
 logger.setLevel(logging.DEBUG)
 
 
+params = {
+    "opacity": 0.5
+}
+
+
+@aiohttp_jinja2.template("align.html")
 async def align_page_handler(request):
-    return html_response('./src/templates/align.html')
+    return {"page_title": "Alignment Tool"}
 
 
 async def align_stream_handler(request):
@@ -47,7 +55,7 @@ async def align_stream_handler(request):
                 logger.debug(f"Loaded reference image - size: {frame.size}, mode: {frame.mode}, format: {frame.format}")
                 i += 1
             
-            blend = Image.blend(ref, frame, 0.5)
+            blend = Image.blend(ref, frame, params["opacity"])
             blend.convert('RGB')
 
             stream = io.BytesIO()
@@ -72,6 +80,22 @@ async def align_stream_handler(request):
             pass
         logger.info("🔁 Stream ended.")
         return response
+
+
+async def reference_adjust_handler(request):
+    data = await request.json()
+
+    response = web.StreamResponse(
+            status=200,
+            reason='OK'
+        )
+    
+    await response.prepare(request)
+
+    params["opacity"] = int(data["opacity"]) / 100
+    
+    return response
+    
 
 
 async def reference_capture_handler(request):
