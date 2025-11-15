@@ -16,6 +16,7 @@ logger.setLevel(logging.INFO)
 
 
 async def run_capture_loop(camera):
+    schedule.cancel_job(schedule_day)
     schedule.every().day.at("00:00", tz_local).do(schedule_day, camera=camera)
     schedule_day(camera)
     logger.info("Time lapse capture loop started.")
