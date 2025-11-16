@@ -9,6 +9,10 @@ import aiohttp_jinja2
 
 from .templates import html_response
 
+
+REFERENCE_IMAGE_FIL = "referemce.jpg"
+
+
 logger = logging.getLogger("stream")
 logger.setLevel(logging.DEBUG)
 
@@ -43,7 +47,7 @@ async def align_stream_handler(request):
     i = 0
     try:
         while True:
-            reference = './images/reference.jpg'
+            reference = 'reference.jpg'
             ref = Image.open(reference)
             ref = ref.convert("RGB")
 
@@ -112,6 +116,6 @@ async def reference_capture_handler(request):
 
     ref = camera.capture_image("main").rotate(90, expand=True)
     ref.convert("RGB")
-    ref.save('./images/reference.jpg', 'JPEG', quality=95)
+    ref.save('reference.jpg', 'JPEG', quality=95)
 
     return response

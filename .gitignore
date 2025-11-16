@@ -216,5 +216,7 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Project directories
-images/
-log
+images*
+log*
+profile*
+reference.jpg
