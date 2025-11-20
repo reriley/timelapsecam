@@ -15,25 +15,27 @@ IMAGE_DIR ="./images"
 logger = logging.getLogger("capture")
 logger.setLevel(logging.INFO)
 
+persistent_schedule = schedule.Scheduler()
+daily_schedule = schedule.Scheduler()
+
 
 async def run_capture_loop(camera):
-    schedule.clear()
-    schedule.every().day.at("00:00", TZ_LOCAL).do(schedule_day, camera=camera)
+    persistent_schedule.every().day.at("00:00", TZ_LOCAL).do(schedule_day, camera=camera)
     schedule_day(camera)
     logger.info("Time lapse capture loop started.")
     
     while True:
-        schedule.run_pending()
+        persistent_schedule.run_pending()
+        daily_schedule.run_pending()
         await asyncio.sleep(60)
 
 
 def schedule_day(camera):
-    schedule.cancel_job(snap_hd)
+    daily_schedule.clear()
     for t in get_times():
-        schedule.every(1).day.at(t, TZ_LOCAL).do(snap_hd, camera=camera)
+        daily_schedule.every(1).day.at(t, TZ_LOCAL).do(snap_hd, camera=camera)
         logger.debug(f"Image capture scheduled for {t}")
     logger.debug(f"Schedule set for {datetime.date.today()}")
-
 
 
 def get_times():
