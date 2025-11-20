@@ -1,0 +1,13 @@
+[Unit]
+Description=Time Lapse Camera
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/timelapsecam/.venv/bin/python /home/pi/timelapsecam/main.py
+Restart=on-abort
+User=pi
+WorkingDirectory=/home/pi/timelapsecam
+
+[Install]
+WantedBy=multi-user.target
